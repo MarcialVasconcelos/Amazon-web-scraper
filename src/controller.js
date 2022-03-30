@@ -1,6 +1,7 @@
 const Request = require("./request")
 const resp = require("./messages.json")
 const validateMessage = require("./validation")
+const send2db = require("./dbController")
 
 class Controller {
   static async onGet(req, res) {
@@ -16,9 +17,11 @@ class Controller {
       
       if (data.status) responseData = { 
         status: data.status, 
-        message: data.message 
+        message: data.message  
       }
       else responseData = {...resp.success, data}
+
+      send2db(req, responseData)
       res.send(responseData)
     } catch (error) {
       res.send({ status: error.status || 500, message: error.message })
