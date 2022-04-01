@@ -12,63 +12,64 @@ const headers = {
 
 class RequestService {
   static async start({ product, quantity }) {
-    const urlArray = [];
+    const urlArray = []
     for (let i = 0; i*48 < quantity; i++) {
       urlArray.push(
         axios.get(`https://www.amazon.com.br/s?k=${encodeURI(product)}&page=${i+1}`, 
         headers,
         )
-      );
+      )
     }
-    const response = await this.requestAmazon(urlArray, quantity);
-    return response;
+    const response = await this.requestAmazon(urlArray, quantity)
+    return response
   }
 
   static async requestAmazon(url, limit) {
     try {
-      let body = await axios.all(url);
+      let body = await axios.all(url)
 
-      const $ = [];
+      const $ = []
       for (let i in body) {
-        $[i] = cheerio.load(body[i].data);
+        $[i] = cheerio.load(body[i].data)
       }
 
-      let list = await this.getProductsFromHtml($, limit);
-      return await Promise.all(list);
+      let list = await this.getProductsFromHtml($, limit)
+      return await Promise.all(list)
     } catch (err) {
-      console.error(err);
-      return { status: err.response.status, message: err.response.statusText };
-      // return err;
+      console.error(err)
+      return { status: err.response.status, message: err.response.statusText }
+      // return err
     }
   }
 
   static async getProductsFromHtml(bodyHtml, limit = 0) {
-    const productList = [];
-    var total = 0;
+    const productList = []
+    var total = 0
     for (let $ of bodyHtml) {
-      let count = 0;
+      let count = 0
 
       $('.s-result-list .s-card-container').each(
         function (i, e) {
           if (count == limit) {
-            return true;
+            return true
           }
 
           if (productList.length == limit) {
-            return productList;
+            return productList
           }
 
           let name = $(this).find(".a-link-normal .a-text-normal").text()
 
           let link = "https://www.amazon.com.br" + $(this).find("a.a-link-normal.a-text-normal").attr("href")
           
-          // Ignores Prime Video cards
+          // Ignores Prime Video produts
           if (link.includes('/gp/')) {
             // console.log(`Ignored: ${name}\n${link}`)
             return
           }
 
-          let price = $(this).find(' [data-a-size="l"] span.a-offscreen').text();
+          let price = parseFloat($(this).find(' [data-a-size="l"] span.a-offscreen').text()
+          .replace('R$', "").replace(",", "."))
 
           let img = $(this).find("img.s-image").attr("src")
 
@@ -97,14 +98,14 @@ class RequestService {
           if (stars) element.stars = stars
           if (prime == 'Amazon Prime') element.prime = true
             else element.prime = false
-          productList.push(element);
+          productList.push(element)
 
-          count++;
+          count++
         }
-      );
-      total += count;
+      )
+      total += count
     }
-    return productList;
+    return productList
   }
 }
 

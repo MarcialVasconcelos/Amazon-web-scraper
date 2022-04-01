@@ -13,6 +13,12 @@ class Controller {
 
       console.log(`${data.length} results found for "${req.body.product}"`)
       // console.log(data)
+
+      data.forEach(product => {
+        // console.log(product)
+        send2db(product)
+      })
+
       let responseData
       
       if (data.status) responseData = { 
@@ -21,7 +27,6 @@ class Controller {
       }
       else responseData = {...resp.success, data}
 
-      send2db(req, responseData)
       res.send(responseData)
     } catch (error) {
       res.send({ status: error.status || 500, message: error.message })
