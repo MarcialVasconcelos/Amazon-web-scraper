@@ -48,7 +48,9 @@ class RequestService {
     for (let $ of bodyHtml) {
       let count = 0
 
-      $('.s-result-list .s-card-container').each(
+      // $('.s-result-list .s-card-container')
+      $('[data-component-type="s-search-result"]')
+      .each(
         function (i, e) {
           if (count == limit) {
             return true
