@@ -71,7 +71,7 @@ class RequestService {
           }
 
           let price = parseFloat($(this).find(' [data-a-size="l"] span.a-offscreen').text()
-          .replace('R$', "").replace(",", "."))
+          .replace('R$', "").replace(".", "").replace(",", "."))
 
           let img = $(this).find("img.s-image").attr("src")
 
