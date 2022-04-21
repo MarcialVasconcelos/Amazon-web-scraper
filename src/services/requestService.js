@@ -60,31 +60,46 @@ class RequestService {
             return productList
           }
 
+          // Scraping Information
           let name = $(this).find(".a-link-normal .a-text-normal").text()
-
+          
           let link = "https://www.amazon.com.br" + $(this).find("a.a-link-normal.a-text-normal").attr("href")
           
-          // Ignores Prime Video produts
-          if (link.includes('/gp/')) {
-            // console.log(`Ignored: ${name}\n${link}`)
-            return
-          }
-
-          let price = parseFloat($(this).find(' [data-a-size="l"] span.a-offscreen').text()
-          .replace('R$', "").replace(".", "").replace(",", "."))
-
+          if (link.includes('/gp/')) return  // Ignores Prime Video produts
+          
+          let price = $(this).find(' [data-a-size="l"] span.a-offscreen').text()
+            .replace('R$', "").replace(".", "").replace(",", ".")
+          price = parseFloat(price)
+          
           let img = $(this).find("img.s-image").attr("src")
-
+          
           let productID = link.split("/dp/")[1].split("/ref")[0]
-
+          
           let reviews = $(this).find('div.a-section.a-spacing-none.a-spacing-top-micro > div.a-row.a-size-small')
             .children('span').last().attr('aria-label')
-
-          let stars = parseFloat($(this).find('span.a-icon-alt').text()
-            .split(' de ')[0].replace(",", "."))
-
+          
+          let stars = $(this).find('span.a-icon-alt').text()
+            .split(' de ')[0].replace(",", ".")
+          stars = parseFloat(stars)
+          
+          let shipingText = $(this).find('.a-section.a-spacing-small.s-padding-left-small.s-padding-right-small')
+            .children('div.a-section.a-spacing-none.a-spacing-top-micro').last()
+            .children('div.a-row').children().last().text()
+          
           let prime  = $(this).find('span.s-prime').children().attr('aria-label')
+          if (prime == 'Amazon Prime') prime = true
+          if (shipingText == 'Frete GRÁTIS no seu primeiro pedido enviado pela Amazon') prime = true
+          
+          let shiping
+          if (shipingText.includes('GRÁTIS')) shiping = 0
+          else {
+            shiping = shipingText.split('de frete')[0].split('R$')[1]
+            if(shiping) shiping = parseFloat(shiping.replace(",", "."))         
+          }
 
+          console.log('Texto do frete:',shipingText,'\nfrete:',shiping)
+
+          // Building the Data object 
           let element = {
             id: total+count,
             name,
@@ -93,13 +108,12 @@ class RequestService {
             productID,
           }
           if (price) element.price = price
-          if (reviews) {
-            reviews = parseInt(reviews.replace(".", ""))
-            element.reviews = reviews
-          }
-          if (stars) element.stars = stars
-          if (prime == 'Amazon Prime') element.prime = true
+          if (shiping || shiping===0) element.shiping = shiping
+          if (prime) element.prime = true
             else element.prime = false
+          if (reviews) element.reviews = parseInt(reviews.replace(".", ""))
+          if (stars) element.stars = stars
+
           productList.push(element)
 
           count++

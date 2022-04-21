@@ -5,7 +5,6 @@ async function saveToMongoDb(product) {
 
     const { name, productID, price, reviews, stars, prime, link, image } = product
 
-
     return Results.create({
         name,
         productID,
