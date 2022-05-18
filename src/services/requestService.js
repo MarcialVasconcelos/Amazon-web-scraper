@@ -5,7 +5,7 @@ const headers = {
   headers: {
     host: "www.amazon.com.br",
     accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
-    'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36 OPR/83.0.4254.70",
+    'user-agent': "AppleWebKit/537.36 (KHTML, like Gecko))", //Mozilla/5.0 (Windows NT 10.0; Win64; x64     Chrome/97.0.4692.99 Safari/537.36 OPR/83.0.4254.70
     Pragma: "no-cache"
   }
 }
@@ -60,6 +60,10 @@ class RequestService {
             return productList
           }
 
+          // Ignores sponsored products
+          if($(this).find("div.a-row.a-spacing-micro").children("span")
+            .children("a.s-label-popover.s-sponsored-label-text").attr("href")) return
+
           // Scraping Information
           let name = $(this).find(".a-link-normal .a-text-normal").text()
           
@@ -67,7 +71,7 @@ class RequestService {
           
           if (link.includes('/gp/')) return  // Ignores Prime Video produts
           
-          let price = $(this).find(' [data-a-size="l"] span.a-offscreen').text()
+          let price = $(this).find(' [data-a-size="xl"] span.a-offscreen').text()
             .replace('R$', "").replace(".", "").replace(",", ".")
           price = parseFloat(price)
           
@@ -97,8 +101,7 @@ class RequestService {
             if(shiping) shiping = parseFloat(shiping.replace(",", "."))         
           }
 
-          console.log('Texto do frete:',shipingText,'\nfrete:',shiping)
-
+          
           // Building the Data object 
           let element = {
             id: total+count,
