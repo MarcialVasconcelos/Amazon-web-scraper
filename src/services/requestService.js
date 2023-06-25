@@ -71,13 +71,14 @@ class RequestService {
           
           if (link.includes('/gp/')) return  // Ignores Prime Video produts
           
-          let price = $(this).find(' [data-a-size="xl"] span.a-offscreen').text()
-            .replace('R$', "").replace(".", "").replace(",", ".")
-          price = parseFloat(price)
+          let price = $(this).find('[data-a-size="l"] span.a-offscreen').text()
+          if (!price) price = $(this).find('[data-a-size="xl"] span.a-offscreen').text()
+          price = parseFloat(price.replace('R$', "").replace(".", "").replace(",", "."))
           
           let img = $(this).find("img.s-image").attr("src")
           
-          let productID = link.split("/dp/")[1].split("/ref")[0]
+          
+          let productID = link.split('/dp/')[1].split('/ref')[0]
           
           let reviews = $(this).find('div.a-section.a-spacing-none.a-spacing-top-micro > div.a-row.a-size-small')
             .children('span').last().attr('aria-label')
@@ -93,9 +94,12 @@ class RequestService {
           let prime  = $(this).find('span.s-prime').children().attr('aria-label')
           if (prime == 'Amazon Prime') prime = true
           if (shipingText == 'Frete GRÁTIS no seu primeiro pedido enviado pela Amazon') prime = true
+          if ($(this).text().includes('Frete GRÁTIS no seu primeiro pedido enviado pela Amazon')) prime = true
+          if ($(this).text().includes('Opção de frete GRÁTIS disponível')) prime = true
+          
           
           let shiping
-          if (shipingText.includes('GRÁTIS')) shiping = 0
+          if (shipingText.includes('GRÁTIS') || prime) shiping = 0.00
           else {
             shiping = shipingText.split('de frete')[0].split('R$')[1]
             if(shiping) shiping = parseFloat(shiping.replace(",", "."))         
